@@ -1,22 +1,26 @@
 import pickle as pkl
 import pandas as pd
 import numpy as np
-import scips as sp
+import scipy.io as spio
 import geopy
 import requets
 import time
+import os
 from geopy.extra.rate_limiter import RateLimiter
 
-"""
-    eiaid_to_zip()
 
-Find the service region (list of ZIP codes) for every LSE identified by their EIA ID
-Create and save a dictionary with EIA ID as keys for list of zip codes 
-"""
 def eiaid_to_zip():
-    iou_path = "../raw/iou_zipcodes_2019.csv"
-    niou_path = "../raw/non_iou_zipcodes_2019.csv"
-    dictpath = "../cache/eiaid2zip.pkl"
+    """Find the service region (list of ZIP codes) for every LSE identified by their EIA ID
+        Create a dictionary with EIA ID as keys for list of zip codes in the cache folder
+        
+    :return: (*None*)
+    """
+
+    file_dir = os.path.abspath(os.path.dirname(__file__))
+    
+    iou_path = os.path.join(file_dir, "../raw/iou_zipcodes_2019.csv")
+    niou_path = os.path.join(file_dir, "../raw/non_iou_zipcodes_2019.csv")
+    dictpath = os.path.join(file_dir, "../cache/eiaid2zip.pkl")
 
     iou_df = pd.read_csv(iou_path)
     niou_df = pd.read_csv(niou_path)
@@ -35,13 +39,14 @@ def eiaid_to_zip():
     with open(dictpath, 'wb') as fh:
         pickle.dump(id2zip, fh)
 
-"""
-    get_bus_pos(case_path)
 
-Read a .mat case and extract the lat/lon coordinate of all buses
-return a list of (busID, lat, lon)
-"""
 def get_bus_pos(case_path):
+    """Read a .mat case and extract the lat/lon coordinate of all buses 
+
+    param string case_path: path to a .mat case file representing a power network
+    :return: (*numpy.ndarray*) -- a list of (busID, lat, lon) stored as a numpy array
+    """
+
     case = spio.loadmat(case_path)
     mpc = case['mpc']
 
@@ -65,13 +70,16 @@ def get_bus_pos(case_path):
     return bus_pos
 
 
-"""
-    get_bus_fips(case_path)
 
-Try to get FIPS of each bus in a case mat using FCC AREA API
-Can take hours to run, save to cache file for future use
-"""
-def get_bus_fips(case_path):
+def get_bus_fips(case_path, start_idx = 0):
+    """Try to get FIPS of each bus in a case mat using FCC AREA API
+        Can take hours to run, save to cache file for future use
+
+    param string case_path: path to a .mat case file representing a power network
+    param int start_idx: pointer to the index of a bus to start query from
+    :return: (*None*)
+    """
+    file_dir = os.path.abspath(os.path.dirname(__file__))
 
     bus_pos = get_bus_pos(case_path)
     bus_fips_dict = {'busid': bus_pos[:, 0],
@@ -81,12 +89,10 @@ def get_bus_fips(case_path):
         
         
     url = "https://geo.fcc.gov/api/census/area"
-    start_idx = 0
 
     for i in range(start_idx, bus_num):
         if i % 1000 == 0:
-            print(i)
-            with open("../cache/bus_fips_usa.pkl", 'wb') as fh:
+            with open(os.path.join(file_dir, "../cache/bus_fips_usa.pkl"), 'wb') as fh:
                 pkl.dump(bus_fips_dict, fh)
                 
         pos = bus_pos[i, :]
@@ -106,16 +112,18 @@ def get_bus_fips(case_path):
             
         time.sleep(0.02)
 
-    with open("../cache/bus_fips_usa.pkl", 'wb') as fh:
+    with open(os.path.join(file_dir, "../cache/bus_fips_usa.pkl"), 'wb') as fh:
         pkl.dump(bus_fips_dict, fh)
 
-"""
-    get_bus_zip(case_path)
 
-Try to get ZIP of each bus in a case mat using geopy
-Can take hours to run, save to cache file for future use
-"""
-def get_bus_zip(case_path):
+def get_bus_zip(case_path, start_idx = 0):
+    """Try to get ZIP of each bus in a case mat using geopy
+        Can take hours to run, save to cache file for future use
+
+    param string case_path: path to a .mat case file representing a power network
+    param int start_idx: pointer to the index of a bus to start query from
+    :return: (*None*)
+    """
     bus_pos = get_bus_pos(case_path)
     bus_zip_dict = {'busid': bus_pos[:, 0],
                 'latitude': bus_pos[:, 1],
@@ -143,21 +151,20 @@ def get_bus_zip(case_path):
     with open("../cache/bus_zip_usa.pkl", 'wb') as fh:
         pkl.dump(bus_zip_dict, fh)
 
-"""
-    fips_zip_conversion()
 
-Create a two-way mapping for all buses in the synthetic grid.
-"""
 def fips_zip_conversion():
-    with open('../cache/bus_fips.pkl', 'rb') as fh:
-        bf = pickle.load(fh)
+    """Create a two-way mapping for all ZIP and FIPS in the crosswalk data
+        save to dictionary files for future use
 
-    df_raw = pd.read_excel("../raw/county_to_zip.xlsx")
+    :return: (*None*)
+    """
+
+    file_dir = os.path.abspath(os.path.dirname(__file__))
+
+    df_raw = pd.read_excel(os.path.join(file_dir, "../raw/county_to_zip.xlsx"))
     all_fips = df_raw['COUNTY'].astype('int32')
     all_zip = df_raw['ZIP'].astype('int32')
     all_weights = df_raw['TOT_RATIO']
-
-    row_num = len(all_zip)
 
     # create zip -> counties mapping
     zip2fips = {}
@@ -170,7 +177,7 @@ def fips_zip_conversion():
         
         zip2fips.update({i: (cty, wgt)})
 
-    with open('../cache/zip2fips.pkl', 'wb') as fh:
+    with open(os.path.join(file_dir, '../cache/zip2fips.pkl'), 'wb') as fh:
         pickle.dump(zip2fips, fh)
 
     # create county -> zips mapping
@@ -185,18 +192,21 @@ def fips_zip_conversion():
         fip2zips.update({i: (zips, wgt)})
 
 
-    with open('../cache/fip2zips.pkl', 'wb') as fh:
+    with open(os.path.join(file_dir, '../cache/fip2zips.pkl'), 'wb') as fh:
         pickle.dump(fip2zips, fh)
 
-"""
-    get_fips_population()
 
-Match county population and county FIPS data to produce concise FIPS population
-"""
 def get_fips_population():
+    """Match county population and county FIPS data to produce concise FIPS population
+        save to a dictonary in cache folder with key being 5-digit FIPS codes.
 
-    cty_pop_df = pd.read_csv('../raw/county_population.csv', encoding='cp1252')
-    cty_name_df = pd.read_csv('../raw/county_fips_master.csv', encoding='cp1252')
+    :return: (*None*)
+    """
+    
+    file_dir = os.path.abspath(os.path.dirname(__file__))
+
+    cty_pop_df = pd.read_csv(os.path.join(file_dir, '../raw/county_population.csv'), encoding='cp1252')
+    cty_name_df = pd.read_csv(os.path.join(file_dir, '../raw/county_fips_master.csv'), encoding='cp1252')
 
     pops = np.zeros(len(cty_name_df.index))
     for cty in cty_name_df.index:
@@ -210,24 +220,26 @@ def get_fips_population():
         elif len(tmp) == 1:
             pops[cty] = tmp
         else:
-            print(name,state,tmp,len(tmp), tmp.to_list())
             pops[cty] = tmp.to_list()[0]
             
     cty_name_df["population"] = pops
 
     new_df = cty_name_df.loc[:, ["fips", "county_name", "population"]]
-    new_df.to_csv("../cache/fips_population.csv", index=False)
+    new_df.to_csv(os.path.join(file_dir, "../cache/fips_population.csv"), index=False)
 
 
-"""
-    get_zip_population()
 
-Compute population of each ZIP code using percentage share and FIPS population
-"""
 def get_zip_population():
-    fips_pop_df = pd.read_csv("../cache/fips_population.csv")
+    """Compute population of each ZIP code using percentage share and FIPS population
+        save to a dictonary in cache folder with key being zip codes.
+
+    :return: (*None*)
+    """
+    file_dir = os.path.abspath(os.path.dirname(__file__))
     
-    with open("../cache/zip2fips.pkl", 'rb') as fh:
+    fips_pop_df = pd.read_csv(os.path.join(file_dir, "../cache/fips_population.csv"))
+    
+    with open(os.path.join(file_dir, "../cache/zip2fips.pkl"), 'rb') as fh:
         zip2fips = pkl.load(fh)
 
     zips = list(zip2fips.keys())
@@ -249,5 +261,5 @@ def get_zip_population():
                 zip_pops[z] += tmp[0] * pcts[f]
 
 
-    with open("../cache/zip_population.pkl", 'wb') as fh:
+    with open(os.path.join(file_dir, "../cache/zip_population.pkl"), 'wb') as fh:
         pkl.dump(zip_pops, fh)
