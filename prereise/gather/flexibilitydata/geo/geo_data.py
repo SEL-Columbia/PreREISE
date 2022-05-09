@@ -1,13 +1,15 @@
-import pickle as pkl
-import pandas as pd
-import numpy as np
-import scipy.io as spio
-import geopy
-import requests
-import time
 import os
+import pickle as pkl
+import time
 import urllib.request
+
+import geopy
+import numpy as np
+import pandas as pd
+import requests
+import scipy.io as spio
 from geopy.extra.rate_limiter import RateLimiter
+
 
 def get_census_data(download_path):
     """download county population data from USA Census website

@@ -1,9 +1,10 @@
 import os
-import pandas as pd
-import numpy as np
-import zipfile
 import tarfile
 import urllib.request
+import zipfile
+
+import numpy as np
+import pandas as pd
 
 
 def cleanup_directory(root):

@@ -1,6 +1,7 @@
+import os
+
 from doe import doe_data
 from geo import geo_data
-import os
 
 
 def collect_all_raw_data(relative_download_path = "raw"):
