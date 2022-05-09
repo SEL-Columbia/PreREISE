@@ -1,4 +1,6 @@
 from doe import doe_data
+from geo import geo_data
+from create_cache_files import *
 
-doe_data.download_doe('doe/data')
-doe_data.aggregate_doe('doe/data','doe/cleaned.csv')
+collect_all_raw_data()
+create_geo_cache_files()
