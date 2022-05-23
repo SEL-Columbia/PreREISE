@@ -137,12 +137,12 @@ def get_bus_zip(case_path, cache_path, start_idx=0):
     }
 
     geocoder = geopy.Nominatim(user_agent="BES")
-    geocode = RateLimiter(
-        geocoder.geocode, min_delay_seconds=0.05, return_value_on_exception=None
+    reverse = RateLimiter(
+        geocoder.reverse, min_delay_seconds=0.05, return_value_on_exception=None
     )
 
     def get_zip_code(lat, lon):
-        location = geocoder.reverse("{}, {}".format(lat, lon))
+        location = reverse("{}, {}".format(lat, lon))
         if location is not None:
             address = location.raw["address"]
         else:
