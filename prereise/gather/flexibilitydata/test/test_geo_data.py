@@ -1,13 +1,9 @@
 import os
 import sys
 
-import pytest
+from geo.batch_process import *
 
 sys.path.append("..")
-
-from doe import doe_data
-from geo import geo_data
-from geo.batch_process import *
 
 
 def test_batch_download():

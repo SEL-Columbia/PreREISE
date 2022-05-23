@@ -10,8 +10,7 @@ import pandas as pd
 def cleanup_directory(root):
     """Recursively cleanup a folder by deleting meaningless or empty files
 
-    :param string root: the root directory containing raw de-compressed DOE flexibility data
-    :return: None
+    :param str root: the root directory containing raw de-compressed DOE flexibility data
     """
 
     all_files = os.listdir(root)
@@ -32,8 +31,7 @@ def cleanup_directory(root):
 def download_doe(download_path="data"):
     """Download demand flexibility filters from OEDI, extract and cleanup
 
-    :param string download_path: the directory where the original DOE data will be stored
-    :return: None
+    :param str download_path: the directory where the original DOE data will be stored
     """
 
     # create data directory
@@ -65,11 +63,10 @@ def download_doe(download_path="data"):
 
 def aggregate_doe(root, out_path):
     """Aggregate sector flexibilties by summing up the percentage flexibility from all sectors
-        and store to output csv file
+    and store to output csv file
 
-    :param string root: the root directory containing raw de-compressed DOE flexibility data
-    :param string out_path: the output file where the aggregated data will be stored
-    :return: None
+    :param str root: the root directory containing raw de-compressed DOE flexibility data
+    :param str out_path: the output file where the aggregated data will be stored
     """
 
     all_folders = os.listdir(root)

@@ -1,15 +1,13 @@
 import os
 import urllib.request
 
-from doe import doe_data
 from geo import geo_data
 
 
 def get_cache_from_blob(rel_cache_path="..\\cache"):
     """download previously uploaded cached files from BLOB storage
 
-    param string rel_cache_path: folder to store downloaded cache files
-    :return: (*None*)
+    :param str rel_cache_path: folder to store downloaded cache files
     """
     file_dir = os.path.abspath(os.path.dirname(__file__))
     cache_path = os.path.normpath(os.path.join(file_dir, rel_cache_path))
@@ -35,8 +33,7 @@ def get_cache_from_blob(rel_cache_path="..\\cache"):
 def collect_all_raw_data(rel_download_path="..\\raw"):
     """download all required raw data needed for producing cached files
 
-    param string rel_download_path: folder to store the downloaded file
-    :return: (*None*)
+    :param str rel_download_path: folder to store the downloaded file
     """
 
     file_dir = os.path.abspath(os.path.dirname(__file__))
@@ -44,16 +41,15 @@ def collect_all_raw_data(rel_download_path="..\\raw"):
 
     geo_data.get_census_data(download_path)
     geo_data.get_crosswalk_data(download_path)
-    geo_data.get_LSE_region_data(download_path)
+    geo_data.get_lse_region_data(download_path)
     geo_data.get_county_fips_data(download_path)
 
 
 def create_geo_cache_files(rel_raw_path="..\\raw", rel_cache_path="..\\cache"):
     """process downloaded raw files and create cached intermediate files
 
-    param string rel_raw_data_path: folder that contains downloaded raw data
-    param string rel_cache_path: folder to store processed cache files
-    :return: (*None*)
+    :param str rel_raw_data_path: folder that contains downloaded raw data
+    :param str rel_cache_path: folder to store processed cache files
     """
 
     file_dir = os.path.abspath(os.path.dirname(__file__))

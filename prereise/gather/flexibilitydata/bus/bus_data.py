@@ -1,9 +1,10 @@
+import os
 import time
-
 import geopy
+import requests
 import numpy as np
 import pandas as pd
-import requests
+import pickle as pkl
 import scipy.io as spio
 from geopy.extra.rate_limiter import RateLimiter
 
@@ -11,7 +12,7 @@ from geopy.extra.rate_limiter import RateLimiter
 def get_bus_pos(case_path):
     """Read a .mat case and extract the lat/lon coordinate of all buses
 
-    param string case_path: path to a .mat case file representing a power network
+    :param str case_path: path to a .mat case file representing a power network
     :return: (*numpy.ndarray*) -- a list of (busID, lat, lon) stored as a numpy array
     """
 
@@ -40,14 +41,14 @@ def get_bus_pos(case_path):
 
 def get_bus_fips(case_path, cache_path, start_idx=0):
     """Try to get FIPS of each bus in a case mat using FCC AREA API
-        Can take hours to run, save to cache file for future use
+    Can take hours to run, save to cache file for future use
 
-    param string case_path: path to a .mat case file representing a power network
-    param string cache_path: folder to store processed cache files
-    param int start_idx: pointer to the index of a bus to start query from
-    :return: (*None*)
+    :param str case_path: path to a .mat case file representing a power network
+    :param str cache_path: folder to store processed cache files
+    :param int start_idx: pointer to the index of a bus to start query from
     """
     bus_pos = get_bus_pos(case_path)
+    bus_num = bus_pos.shape[0]
     bus_fips_dict = {
         "busid": bus_pos[:, 0],
         "latitude": bus_pos[:, 1],
@@ -59,7 +60,7 @@ def get_bus_fips(case_path, cache_path, start_idx=0):
 
     for i in range(start_idx, bus_num):
         if i % 1000 == 0:
-            with open(os.path.join(file_dir, "../cache/bus_fips_usa.pkl"), "wb") as fh:
+            with open(os.path.join(cache_path, "bus_fips.pkl"), "wb") as fh:
                 pkl.dump(bus_fips_dict, fh)
 
         pos = bus_pos[i, :]
@@ -82,10 +83,10 @@ def get_bus_fips(case_path, cache_path, start_idx=0):
 
 def cleanup_zip(zipdict):
     """Try to cleanup a zip dictionary obtained using online query by converting
-        to 5-digit integers. Several possible mis-format are considered
+    to 5-digit integers. Several possible mis-format are considered
 
-    param dicitonary zipdict: a dictionary containing raw zip-code of buses
-    :return: (*dictionary*) -- a dictionary containing 5-digit zip codes
+    :param dict zipdict: a dictionary containing raw zip-code of buses
+    :return: (*dict*) -- a dictionary containing 5-digit zip codes
     """
     for i in range(len(zipdict["zip"])):
         try:
@@ -120,14 +121,14 @@ def cleanup_zip(zipdict):
 
 def get_bus_zip(case_path, cache_path, start_idx=0):
     """Try to get ZIP of each bus in a case mat using geopy
-        Can take hours to run, save to cache file for future use
+    Can take hours to run, save to cache file for future use
 
-    param string case_path: path to a .mat case file representing a power network
-    param string cache_path: folder to store processed cache files
-    param int start_idx: pointer to the index of a bus to start query from
-    :return: (*None*)
+    :param str case_path: path to a .mat case file representing a power network
+    :param str cache_path: folder to store processed cache files
+    :param int start_idx: pointer to the index of a bus to start query from
     """
     bus_pos = get_bus_pos(case_path)
+    bus_num = bus_pos.shape[0]
     bus_zip_dict = {
         "busid": bus_pos[:, 0],
         "latitude": bus_pos[:, 1],
@@ -166,10 +167,9 @@ def get_bus_zip(case_path, cache_path, start_idx=0):
 def get_all_bus_eiaid(bus_csv_path, cache_path, out_path):
     """Compute the EIA ID of each bus in bus.csv from powersimdata using cached files
 
-    param string bus_csv_path: bus.csv in a powersimdata network model
-    param string cache_path: folder to store processed cache files
-    param string out_path: output path to store the bus.csv with EIA ID
-    :return: (*None*)
+    :param str bus_csv_path: bus.csv in a powersimdata network model
+    :param str cache_path: folder to store processed cache files
+    :param str out_path: output path to store the bus.csv with EIA ID
     """
 
     # check all required files
@@ -203,13 +203,13 @@ def get_all_bus_eiaid(bus_csv_path, cache_path, out_path):
     with open(cache_path + "/eiaid2zip.pkl", "rb") as fh:
         eiaid2zip = pkl.load(fh)
 
-    all_eias = list(eia2zip.keys())
+    all_eias = list(eiaid2zip.keys())
     bus_num = bus_df["bus_id"].shape[0]
     bus_df["eia_id"] = np.zeros(bus_num, dtype=int)
 
     # match with zip
     for i in all_eias:
-        e_zips = eia2zip[i]
+        e_zips = eiaid2zip[i]
 
         # all zips that belong to this eia
         for z in e_zips:
@@ -224,7 +224,7 @@ def get_all_bus_eiaid(bus_csv_path, cache_path, out_path):
 
     # match again with fips
     for i in all_eias:
-        e_fips = eia2fips[i][0]
+        e_fips = eiaid2fips[i][0]
 
         # all zips that belong to this eia
         for f in e_fips:

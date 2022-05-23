@@ -7,10 +7,9 @@ import pandas as pd
 
 
 def get_census_data(download_path):
-    """download county population data from USA Census website
+    """Download county population data from USA Census website
 
-    param string download_path: folder to store the downloaded file
-    :return: (*None*)
+    :param str download_path: folder to store the downloaded file
     """
 
     os.makedirs(download_path, exist_ok=True)
@@ -21,10 +20,9 @@ def get_census_data(download_path):
 
 
 def get_crosswalk_data(download_path):
-    """download FIPS-ZIP crosswalk data from USPS and convert to csv
+    """Download FIPS-ZIP crosswalk data from USPS and convert to csv
 
-    param string download_path: folder to store the downloaded file
-    :return: (*None*)
+    :param str download_path: folder to store the downloaded file
     """
 
     # download
@@ -41,11 +39,10 @@ def get_crosswalk_data(download_path):
     os.remove(download_path + "/county_to_zip.xlsx")
 
 
-def get_LSE_region_data(download_path):
-    """download LSE service region data
+def get_lse_region_data(download_path):
+    """Download LSE service region data
 
-    param string download_path: folder to store the downloaded file
-    :return: (*None*)
+    :param str download_path: folder to store the downloaded file
     """
 
     os.makedirs(download_path, exist_ok=True)
@@ -59,10 +56,9 @@ def get_LSE_region_data(download_path):
 
 
 def get_county_fips_data(download_path):
-    """download county FIPS data
+    """Download county FIPS data
 
-    param string download_path: folder to store the downloaded file
-    :return: (*None*)
+    :param str download_path: folder to store the downloaded file
     """
 
     os.makedirs(download_path, exist_ok=True)
@@ -76,11 +72,10 @@ def get_county_fips_data(download_path):
 
 def eiaid_to_zip(raw_data_path, cache_path):
     """Find the service region (list of ZIP codes) for every LSE identified by their EIA ID
-        Create a dictionary with EIA ID as keys for list of zip codes in the cache folder
+    Create a dictionary with EIA ID as keys for list of zip codes in the cache folder
 
-    param string raw_data_path: folder that contains downloaded raw data
-    param string cache_path: folder to store processed cache files
-    :return: (*None*)
+    :param str raw_data_path: folder that contains downloaded raw data
+    :param str cache_path: folder to store processed cache files
     """
 
     assert os.path.isfile(
@@ -109,11 +104,10 @@ def eiaid_to_zip(raw_data_path, cache_path):
 
 def eiaid_to_fips(raw_data_path, cache_path):
     """Find the service region (list of FIPS codes) for every LSE identified by their EIA ID
-        Create a dictionary with EIA ID as keys for list of FIPS codes in the cache folder
+    Create a dictionary with EIA ID as keys for list of FIPS codes in the cache folder
 
-    param string raw_data_path: folder that contains downloaded raw data
-    param string cache_path: folder to store processed cache files
-    :return: (*None*)
+    :param str raw_data_path: folder that contains downloaded raw data
+    :param str cache_path: folder to store processed cache files
     """
 
     assert os.path.isfile(
@@ -150,7 +144,7 @@ def eiaid_to_fips(raw_data_path, cache_path):
         for j in zips:
             try:
                 fipss, weights = zip2fips[j]
-            except:
+            except Exception:
                 continue
             fips_num = len(fipss)
 
@@ -173,11 +167,10 @@ def eiaid_to_fips(raw_data_path, cache_path):
 
 def fips_zip_conversion(raw_data_path, cache_path):
     """Create a two-way mapping for all ZIP and FIPS in the crosswalk data
-        save to dictionary files for future use
+    save to dictionary files for future use
 
-    param string raw_data_path: folder that contains downloaded raw data
-    param string cache_path: folder to store processed cache files
-    :return: (*None*)
+    :param str raw_data_path: folder that contains downloaded raw data
+    :param str cache_path: folder to store processed cache files
     """
     assert os.path.isfile(
         raw_data_path + "/county_to_zip.csv"
@@ -220,11 +213,10 @@ def fips_zip_conversion(raw_data_path, cache_path):
 
 def get_fips_population(raw_data_path, cache_path):
     """Match county population and county FIPS data to produce concise FIPS population
-        save to a dictonary in cache folder with key being 5-digit FIPS codes.
+    save to a dictonary in cache folder with key being 5-digit FIPS codes.
 
-    param string raw_data_path: folder that contains downloaded raw data
-    param string cache_path: folder to store processed cache files
-    :return: (*None*)
+    :param str raw_data_path: folder that contains downloaded raw data
+    :param str cache_path: folder to store processed cache files
     """
 
     assert os.path.isfile(
@@ -268,11 +260,10 @@ def get_fips_population(raw_data_path, cache_path):
 
 def get_zip_population(raw_data_path, cache_path):
     """Compute population of each ZIP code using percentage share and FIPS population
-        save to a dictonary in cache folder with key being zip codes.
+    save to a dictonary in cache folder with key being zip codes.
 
-    param string raw_data_path: folder that contains downloaded raw data
-    param string cache_path: folder to store processed cache files
-    :return: (*None*)
+    :param str raw_data_path: folder that contains downloaded raw data
+    :param str cache_path: folder to store processed cache files
     """
 
     assert os.path.isfile(
