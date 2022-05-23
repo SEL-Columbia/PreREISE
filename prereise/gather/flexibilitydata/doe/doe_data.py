@@ -86,8 +86,7 @@ def aggregate_doe(root, out_path):
 
         # assign index to the output df
         if 'time' not in eia_flex.keys():
-            eia_flex['time'] = file_flex.index.copy()
-            eia_flex['time'] = pd.to_datetime(eia_flex['time'])
+            eia_flex['time'] = pd.to_datetime(file_flex.index.copy())
             eia_flex.set_index('time', inplace=True)
             
         eia_flex[i] = eia_flex[i] + file_flex['Flexibility'].values
