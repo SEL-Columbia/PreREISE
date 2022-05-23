@@ -3,7 +3,7 @@ import sys
 
 import pytest
 
-sys.path.append('..')
+sys.path.append("..")
 
 from doe import doe_data
 from geo import geo_data
@@ -11,9 +11,8 @@ from geo.batch_process import *
 
 
 def test_batch_download():
-    """Test the downloader from all raw data sources, check if file exist
-    """
-    
+    """Test the downloader from all raw data sources, check if file exist"""
+
     rel_download_path = "..\\raw"
     collect_all_raw_data(rel_download_path)
 
@@ -26,8 +25,7 @@ def test_batch_download():
 
 
 def test_cache_production():
-    """Test the functions that produce cached files
-    """
+    """Test the functions that produce cached files"""
 
     rel_raw_path = "..\\raw"
     rel_cache_path = "..\\cache"
@@ -41,4 +39,3 @@ def test_cache_production():
     assert os.path.isfile(rel_cache_path + "\\fips_population.pkl")
     assert os.path.isfile(rel_cache_path + "\\zip_population.pkl")
     assert os.path.isfile(rel_cache_path + "\\zip2fips.pkl")
-    
