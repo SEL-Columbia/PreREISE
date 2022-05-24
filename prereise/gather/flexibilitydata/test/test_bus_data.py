@@ -2,6 +2,7 @@ import os
 import pickle as pkl
 
 import numpy as np
+
 from prereise.gather.flexibilitydata.bus.bus_data import get_bus_fips, get_bus_zip
 
 

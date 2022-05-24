@@ -1,6 +1,5 @@
 import batch_process
 
-
 download_path = "..\\raw"
 cache_path = "..\\cache"
 

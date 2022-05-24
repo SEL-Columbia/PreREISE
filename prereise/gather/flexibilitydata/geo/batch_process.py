@@ -1,11 +1,11 @@
 import os
 import urllib.request
 
-import geo_data
+import prereise.gather.flexibilitydata.geo.geo_data
 
 
 def get_cache_from_blob(rel_cache_path="..\\cache"):
-    """download previously uploaded cached files from BLOB storage
+    """Download previously uploaded cached files from BLOB storage
 
     :param str rel_cache_path: folder to store downloaded cache files
     """
@@ -31,7 +31,7 @@ def get_cache_from_blob(rel_cache_path="..\\cache"):
 
 
 def collect_all_raw_data(rel_download_path="..\\raw"):
-    """download all required raw data needed for producing cached files
+    """Download all required raw data needed for producing cached files
 
     :param str rel_download_path: folder to store the downloaded file
     """
@@ -46,7 +46,7 @@ def collect_all_raw_data(rel_download_path="..\\raw"):
 
 
 def create_geo_cache_files(rel_raw_path="..\\raw", rel_cache_path="..\\cache"):
-    """process downloaded raw files and create cached intermediate files
+    """Process downloaded raw files and create cached intermediate files
 
     :param str rel_raw_data_path: folder that contains downloaded raw data
     :param str rel_cache_path: folder to store processed cache files
