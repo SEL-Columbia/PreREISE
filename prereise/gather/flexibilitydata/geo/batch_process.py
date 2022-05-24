@@ -1,7 +1,7 @@
 import os
 import urllib.request
 
-from geo import geo_data
+import geo_data
 
 
 def get_cache_from_blob(rel_cache_path="..\\cache"):

@@ -1,18 +1,20 @@
 import os
+import pickle as pkl
 import time
+
 import geopy
-import requests
 import numpy as np
 import pandas as pd
-import pickle as pkl
+import requests
 import scipy.io as spio
 from geopy.extra.rate_limiter import RateLimiter
 
 
-def get_bus_pos(case_path):
+def get_bus_pos(case_path, cache_path):
     """Read a .mat case and extract the lat/lon coordinate of all buses
 
     :param str case_path: path to a .mat case file representing a power network
+    :param str cache_path: folder to store processed cache files
     :return: (*numpy.ndarray*) -- a list of (busID, lat, lon) stored as a numpy array
     """
 
@@ -36,18 +38,18 @@ def get_bus_pos(case_path):
         bus_pos[i, 1] = sub[bus_sub_idx, 2]
         bus_pos[i, 2] = sub[bus_sub_idx, 3]
 
-    return bus_pos
+    with open(os.path.join(cache_path, "bus_pos.pkl"), "wb") as fh:
+        pkl.dump(bus_pos, fh)
 
 
-def get_bus_fips(case_path, cache_path, start_idx=0):
+def get_bus_fips(bus_pos, cache_path, start_idx=0):
     """Try to get FIPS of each bus in a case mat using FCC AREA API
     Can take hours to run, save to cache file for future use
 
-    :param str case_path: path to a .mat case file representing a power network
+    :param numpy.ndarray bus_pos: a list of (busID, lat, lon) stored as a numpy array
     :param str cache_path: folder to store processed cache files
     :param int start_idx: pointer to the index of a bus to start query from
     """
-    bus_pos = get_bus_pos(case_path)
     bus_num = bus_pos.shape[0]
     bus_fips_dict = {
         "busid": bus_pos[:, 0],
@@ -64,6 +66,7 @@ def get_bus_fips(case_path, cache_path, start_idx=0):
                 pkl.dump(bus_fips_dict, fh)
 
         pos = bus_pos[i, :]
+
         params = {"latitude": pos[1], "longitude": pos[2], "format": "json"}
         r = requests.get(url, params=params)
 
@@ -77,7 +80,7 @@ def get_bus_fips(case_path, cache_path, start_idx=0):
 
         time.sleep(0.02)
 
-    with open(cache_path + "/bus_fips.pkl", "wb") as fh:
+    with open(os.path.join(cache_path, "bus_fips.pkl"), "wb") as fh:
         pkl.dump(bus_fips_dict, fh)
 
 
@@ -119,15 +122,13 @@ def cleanup_zip(zipdict):
     return zipdict
 
 
-def get_bus_zip(case_path, cache_path, start_idx=0):
+def get_bus_zip(bus_pos, cache_path, start_idx=0):
     """Try to get ZIP of each bus in a case mat using geopy
     Can take hours to run, save to cache file for future use
 
-    :param str case_path: path to a .mat case file representing a power network
-    :param str cache_path: folder to store processed cache files
+    :param numpy.ndarray bus_pos: a list of (busID, lat, lon) stored as a numpy array    :param str cache_path: folder to store processed cache files
     :param int start_idx: pointer to the index of a bus to start query from
     """
-    bus_pos = get_bus_pos(case_path)
     bus_num = bus_pos.shape[0]
     bus_zip_dict = {
         "busid": bus_pos[:, 0],
@@ -160,7 +161,7 @@ def get_bus_zip(case_path, cache_path, start_idx=0):
 
     bus_zip_dict = cleanup_zip(bus_zip_dict)
 
-    with open(cache_path + "/bus_zip.pkl", "wb") as fh:
+    with open(os.path.join(cache_path, "bus_zip.pkl"), "wb") as fh:
         pkl.dump(bus_zip_dict, fh)
 
 
@@ -177,30 +178,30 @@ def get_all_bus_eiaid(bus_csv_path, cache_path, out_path):
         bus_csv_path
     ), "Incorrect path for network data files bus.csv."
     assert os.path.isfile(
-        cache_path + "/bus_fips.pkl"
+        os.path.join(cache_path, "bus_fips.pkl")
     ), "Cached file bus_fips.pkl does not exist."
     assert os.path.isfile(
-        cache_path + "/bus_zip.pkl"
+        os.path.join(cache_path, "bus_zip.pkl")
     ), "Cached file bus_zip.pkl does not exist."
     assert os.path.isfile(
-        cache_path + "/eiaid2fips.pkl"
+        os.path.join(cache_path, "eiaid2fips.pkl")
     ), "Cached file eiaid2fips.pkl does not exist."
     assert os.path.isfile(
-        cache_path + "/eiaid2zip.pkl"
+        os.path.join(cache_path, "eiaid2zip.pkl")
     ), "Cached file eiaid2zip.pkl does not exist."
 
     bus_df = pd.read_csv(bus_csv_path)
 
-    with open(cache_path + "/bus_fips.pkl", "rb") as fh:
+    with open(os.path.join(cache_path, "bus_fips.pkl"), "rb") as fh:
         bus_fips = pkl.load(fh)
 
-    with open(cache_path + "/bus_zip.pkl", "rb") as fh:
+    with open(os.path.join(cache_path, "bus_zip.pkl"), "rb") as fh:
         bus_zip = pkl.load(fh)
 
-    with open(cache_path + "/eiaid2fips.pkl", "rb") as fh:
+    with open(os.path.join(cache_path, "eiaid2fips.pkl"), "rb") as fh:
         eiaid2fips = pkl.load(fh)
 
-    with open(cache_path + "/eiaid2zip.pkl", "rb") as fh:
+    with open(os.path.join(cache_path, "eiaid2zip.pkl"), "rb") as fh:
         eiaid2zip = pkl.load(fh)
 
     all_eias = list(eiaid2zip.keys())

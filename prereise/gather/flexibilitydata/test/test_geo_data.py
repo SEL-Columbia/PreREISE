@@ -1,9 +1,9 @@
 import os
-import sys
 
-from geo.batch_process import collect_all_raw_data, create_geo_cache_files
-
-sys.path.append("..")
+from prereise.gather.flexibilitydata.geo.batch_process import (
+    collect_all_raw_data,
+    create_geo_cache_files,
+)
 
 
 def test_batch_download():
@@ -13,11 +13,13 @@ def test_batch_download():
     collect_all_raw_data(rel_download_path)
 
     # check downloaded files
-    assert os.path.isfile(rel_download_path + "\\county_fips_master.csv")
-    assert os.path.isfile(rel_download_path + "\\county_population.csv")
-    assert os.path.isfile(rel_download_path + "\\county_to_zip.csv")
-    assert os.path.isfile(rel_download_path + "\\iou_zipcodes_2019.csv")
-    assert os.path.isfile(rel_download_path + "\\non_iou_zipcodes_2019.csv")
+    assert os.path.isfile(os.path.join(rel_download_path, "\\county_fips_master.csv"))
+    assert os.path.isfile(os.path.join(rel_download_path, "\\county_population.csv"))
+    assert os.path.isfile(os.path.join(rel_download_path, "\\county_to_zip.csv"))
+    assert os.path.isfile(os.path.join(rel_download_path, "\\iou_zipcodes_2019.csv"))
+    assert os.path.isfile(
+        os.path.join(rel_download_path, "\\non_iou_zipcodes_2019.csv")
+    )
 
 
 def test_cache_production():
@@ -29,9 +31,9 @@ def test_cache_production():
     create_geo_cache_files(rel_raw_path, rel_cache_path)
 
     # check cache files
-    assert os.path.isfile(rel_cache_path + "\\eiaid2fips.pkl")
-    assert os.path.isfile(rel_cache_path + "\\eiaid2zip.pkl")
-    assert os.path.isfile(rel_cache_path + "\\fips2zip.pkl")
-    assert os.path.isfile(rel_cache_path + "\\fips_population.pkl")
-    assert os.path.isfile(rel_cache_path + "\\zip_population.pkl")
-    assert os.path.isfile(rel_cache_path + "\\zip2fips.pkl")
+    assert os.path.isfile(os.path.join(rel_cache_path, "\\eiaid2fips.pkl"))
+    assert os.path.isfile(os.path.join(rel_cache_path, "\\eiaid2zip.pkl"))
+    assert os.path.isfile(os.path.join(rel_cache_path, "\\fips2zip.pkl"))
+    assert os.path.isfile(os.path.join(rel_cache_path, "\\fips_population.pkl"))
+    assert os.path.isfile(os.path.join(rel_cache_path, "\\zip_population.pkl"))
+    assert os.path.isfile(os.path.join(rel_cache_path, "\\zip2fips.pkl"))

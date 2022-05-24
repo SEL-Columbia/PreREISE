@@ -15,7 +15,7 @@ def get_census_data(download_path):
     os.makedirs(download_path, exist_ok=True)
     census_file_link = "https://www2.census.gov/programs-surveys/popest/datasets/2010-2020/counties/totals/co-est2020-alldata.csv"
     urllib.request.urlretrieve(
-        census_file_link, download_path + "/county_population.csv"
+        census_file_link, os.path.join(download_path, "county_population.csv")
     )
 
 
@@ -30,13 +30,15 @@ def get_crosswalk_data(download_path):
     usps_file_link = (
         "https://www.huduser.gov/portal/datasets/usps/COUNTY_ZIP_122021.xlsx"
     )
-    urllib.request.urlretrieve(usps_file_link, download_path + "/county_to_zip.xlsx")
+    urllib.request.urlretrieve(
+        usps_file_link, os.path.join(download_path, "county_to_zip.xlsx")
+    )
 
     # convert to csv
-    usps_df = pd.read_excel(download_path + "/county_to_zip.xlsx")
+    usps_df = pd.read_excel(os.path.join(download_path, "county_to_zip.xlsx"))
     usps_df = usps_df.sort_values(by=["county", "zip"])
-    usps_df.to_csv(download_path + "/county_to_zip.csv", index=False)
-    os.remove(download_path + "/county_to_zip.xlsx")
+    usps_df.to_csv(os.path.join(download_path, "county_to_zip.csv"), index=False)
+    os.remove(os.path.join(download_path, "county_to_zip.xlsx"))
 
 
 def get_lse_region_data(download_path):
@@ -49,9 +51,11 @@ def get_lse_region_data(download_path):
     iou_file_link = "https://data.openei.org/files/4042/iou_zipcodes_2019.csv"
     niou_file_link = "https://data.openei.org/files/4042/non_iou_zipcodes_2019.csv"
 
-    urllib.request.urlretrieve(iou_file_link, download_path + "/iou_zipcodes_2019.csv")
     urllib.request.urlretrieve(
-        niou_file_link, download_path + "/non_iou_zipcodes_2019.csv"
+        iou_file_link, os.path.join(download_path, "iou_zipcodes_2019.csv")
+    )
+    urllib.request.urlretrieve(
+        niou_file_link, os.path.join(download_path, "non_iou_zipcodes_2019.csv")
     )
 
 
@@ -66,7 +70,7 @@ def get_county_fips_data(download_path):
         "https://github.com/kjhealy/fips-codes/raw/master/county_fips_master.csv"
     )
     urllib.request.urlretrieve(
-        county_fips_link, download_path + "/county_fips_master.csv"
+        county_fips_link, os.path.join(download_path, "county_fips_master.csv")
     )
 
 
@@ -79,14 +83,14 @@ def eiaid_to_zip(raw_data_path, cache_path):
     """
 
     assert os.path.isfile(
-        raw_data_path + "/iou_zipcodes_2019.csv"
+        os.path.join(raw_data_path, "iou_zipcodes_2019.csv")
     ), "Input file iou_zipcodes_2019.csv does not exist."
     assert os.path.isfile(
-        raw_data_path + "/non_iou_zipcodes_2019.csv"
+        os.path.join(raw_data_path, "non_iou_zipcodes_2019.csv")
     ), "Input file non_iou_zipcodes_2019.csv does not exist."
 
-    iou_df = pd.read_csv(raw_data_path + "/iou_zipcodes_2019.csv")
-    niou_df = pd.read_csv(raw_data_path + "/non_iou_zipcodes_2019.csv")
+    iou_df = pd.read_csv(os.path.join(raw_data_path, "iou_zipcodes_2019.csv"))
+    niou_df = pd.read_csv(os.path.join(raw_data_path, "non_iou_zipcodes_2019.csv"))
 
     all_ids = list(set(iou_df["eiaid"].to_list() + niou_df["eiaid"].to_list()))
 
@@ -98,7 +102,7 @@ def eiaid_to_zip(raw_data_path, cache_path):
         allzips = sorted(list(set(iouzips + niouzips)))
         id2zip[i] = allzips
 
-    with open(cache_path + "/eiaid2zip.pkl", "wb") as fh:
+    with open(os.path.join(cache_path, "eiaid2zip.pkl"), "wb") as fh:
         pkl.dump(id2zip, fh)
 
 
@@ -111,23 +115,23 @@ def eiaid_to_fips(raw_data_path, cache_path):
     """
 
     assert os.path.isfile(
-        cache_path + "/eiaid2zip.pkl"
+        os.path.join(cache_path, "eiaid2zip.pkl")
     ), "Cached file eiaid2zip.pkl does not exist."
     assert os.path.isfile(
-        cache_path + "/zip2fips.pkl"
+        os.path.join(cache_path, "zip2fips.pkl")
     ), "Cached file zip2fips.pkl does not exist."
     assert os.path.isfile(
-        cache_path + "/fips_population.pkl"
+        os.path.join(cache_path, "fips_population.pkl")
     ), "Cached file fips_population.pkl does not exist."
 
     # load cached data
-    with open(cache_path + "/eiaid2zip.pkl", "rb") as fh:
+    with open(os.path.join(cache_path, "eiaid2zip.pkl"), "rb") as fh:
         eiaid2zip = pkl.load(fh)
 
-    with open(cache_path + "/zip2fips.pkl", "rb") as fh:
+    with open(os.path.join(cache_path, "zip2fips.pkl"), "rb") as fh:
         zip2fips = pkl.load(fh)
 
-    with open(cache_path + "/fips_population.pkl", "rb") as fh:
+    with open(os.path.join(cache_path, "fips_population.pkl"), "rb") as fh:
         fips_pop_df = pkl.load(fh)
 
     eia_keys = list(eiaid2zip.keys())
@@ -161,7 +165,7 @@ def eiaid_to_fips(raw_data_path, cache_path):
 
         eiaid2fips.update({key: [all_fips, all_pops]})
 
-    with open(cache_path + "/eiaid2fips.pkl", "wb") as fh:
+    with open(os.path.join(cache_path, "eiaid2fips.pkl"), "wb") as fh:
         pkl.dump(eiaid2fips, fh)
 
 
@@ -173,10 +177,10 @@ def fips_zip_conversion(raw_data_path, cache_path):
     :param str cache_path: folder to store processed cache files
     """
     assert os.path.isfile(
-        raw_data_path + "/county_to_zip.csv"
+        os.path.join(raw_data_path, "county_to_zip.csv")
     ), "Input file county_to_zip.csv does not exist."
 
-    df_raw = pd.read_csv(raw_data_path + "/county_to_zip.csv")
+    df_raw = pd.read_csv(os.path.join(raw_data_path, "county_to_zip.csv"))
 
     all_fips = df_raw["county"].astype("int32")
     all_zip = df_raw["zip"].astype("int32")
@@ -193,7 +197,7 @@ def fips_zip_conversion(raw_data_path, cache_path):
 
         zip2fips.update({i: (cty, wgt)})
 
-    with open(cache_path + "/zip2fips.pkl", "wb") as fh:
+    with open(os.path.join(cache_path, "zip2fips.pkl"), "wb") as fh:
         pkl.dump(zip2fips, fh)
 
     # create county -> zips mapping
@@ -207,7 +211,7 @@ def fips_zip_conversion(raw_data_path, cache_path):
 
         fips2zip.update({i: (zips, wgt)})
 
-    with open(cache_path + "/fips2zip.pkl", "wb") as fh:
+    with open(os.path.join(cache_path, "fips2zip.pkl"), "wb") as fh:
         pkl.dump(fips2zip, fh)
 
 
@@ -220,17 +224,17 @@ def get_fips_population(raw_data_path, cache_path):
     """
 
     assert os.path.isfile(
-        raw_data_path + "/county_population.csv"
+        os.path.join(raw_data_path, "county_population.csv")
     ), "Input file county_population.csv does not exist."
     assert os.path.isfile(
-        raw_data_path + "/county_fips_master.csv"
+        os.path.join(raw_data_path, "county_fips_master.csv")
     ), "Input file county_fips_master.csv does not exist."
 
     cty_pop_df = pd.read_csv(
-        raw_data_path + "/county_population.csv", encoding="cp1252"
+        os.path.join(raw_data_path, "county_population.csv"), encoding="cp1252"
     )
     cty_name_df = pd.read_csv(
-        raw_data_path + "/county_fips_master.csv", encoding="cp1252"
+        os.path.join(raw_data_path, "county_fips_master.csv"), encoding="cp1252"
     )
 
     pops = np.zeros(len(cty_name_df.index))
@@ -254,7 +258,7 @@ def get_fips_population(raw_data_path, cache_path):
 
     new_df = cty_name_df.loc[:, ["fips", "county_name", "population"]]
 
-    with open(cache_path + "/fips_population.pkl", "wb") as fh:
+    with open(os.path.join(cache_path, "fips_population.pkl"), "wb") as fh:
         pkl.dump(new_df, fh)
 
 
@@ -267,16 +271,16 @@ def get_zip_population(raw_data_path, cache_path):
     """
 
     assert os.path.isfile(
-        cache_path + "/fips_population.pkl"
+        os.path.join(cache_path, "fips_population.pkl")
     ), "Cached fips_population.pkl does not exist."
     assert os.path.isfile(
-        cache_path + "/zip2fips.pkl"
+        os.path.join(cache_path, "zip2fips.pkl")
     ), "Cached file zip2fips.pkl does not exist."
 
-    with open(cache_path + "/fips_population.pkl", "rb") as fh:
+    with open(os.path.join(cache_path, "fips_population.pkl"), "rb") as fh:
         fips_pop_df = pkl.load(fh)
 
-    with open(cache_path + "/zip2fips.pkl", "rb") as fh:
+    with open(os.path.join(cache_path, "zip2fips.pkl"), "rb") as fh:
         zip2fips = pkl.load(fh)
 
     zips = sorted(list(zip2fips.keys()))
@@ -295,5 +299,5 @@ def get_zip_population(raw_data_path, cache_path):
             if len(tmp) > 0:
                 zip_pops[z] += tmp[0] * pcts[f]
 
-    with open(cache_path + "/zip_population.pkl", "wb") as fh:
+    with open(os.path.join(cache_path, "zip_population.pkl"), "wb") as fh:
         pkl.dump(zip_pops, fh)

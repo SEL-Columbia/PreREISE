@@ -41,14 +41,16 @@ def download_doe(download_path="data"):
     oedi_filter_link = (
         "https://data.openei.org/files/180/2006weatherentireusdrfilters.tar.zip"
     )
-    urllib.request.urlretrieve(oedi_filter_link, download_path + "/filter.zip")
+    urllib.request.urlretrieve(
+        oedi_filter_link, os.path.join(download_path, "filter.zip")
+    )
 
     # extract
-    with zipfile.ZipFile(download_path + "/filter.zip", "r") as fh:
+    with zipfile.ZipFile(os.path.join(download_path, "filter.zip"), "r") as fh:
         fh.extractall(download_path)
 
     # delete and further extract
-    os.remove(download_path + "/filter.zip")
+    os.remove(os.path.join(download_path, "filter.zip"))
 
     for i in os.listdir(download_path):
         fh = tarfile.open(os.path.join(download_path, i))
@@ -108,5 +110,3 @@ def aggregate_doe(root, out_path):
 
     eia_flex = eia_flex.round(4)
     eia_flex.to_csv(out_path)
-
-    return
