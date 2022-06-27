@@ -1,9 +1,9 @@
 import os
 
 import geopandas as gpd
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from zone_profile_generator import zone_shp_overlay
 
 
@@ -226,12 +226,12 @@ def main_plots(iso_list):
 
         iso_dayhour = pd.DataFrame()
         iso_dayhour["s.heat"] = (
-            iso_dayhour_fits[f"s.heat.wk"] * 5 + iso_dayhour_fits[f"s.heat.wknd"] * 2
+            iso_dayhour_fits["s.heat.wk"] * 5 + iso_dayhour_fits["s.heat.wknd"] * 2
         ) / 7
         iso_dayhour["s.heat.stderr"] = (
             np.sqrt(
-                iso_dayhour_fits[f"s.heat.stderr.wk"] ** 2 * 5**2
-                + iso_dayhour_fits[f"s.heat.stderr.wknd"] ** 2 * 2**2
+                iso_dayhour_fits["s.heat.stderr.wk"] ** 2 * 5**2
+                + iso_dayhour_fits["s.heat.stderr.wknd"] ** 2 * 2**2
             )
             / 7
         )
@@ -241,8 +241,8 @@ def main_plots(iso_list):
         ) / 7
         iso_dayhour["s.cool.db.stderr"] = (
             np.sqrt(
-                iso_dayhour_fits[f"s.cool.db.stderr.wk"] ** 2 * 5**2
-                + iso_dayhour_fits[f"s.cool.db.stderr.wknd"] ** 2 * 2**2
+                iso_dayhour_fits["s.cool.db.stderr.wk"] ** 2 * 5**2
+                + iso_dayhour_fits["s.cool.db.stderr.wknd"] ** 2 * 2**2
             )
             / 7
         )
@@ -250,16 +250,16 @@ def main_plots(iso_list):
         fig, ax1 = plt.subplots()
         ax1.errorbar(
             iso_dayhour.index,
-            np.abs(iso_dayhour[f"s.heat"]),
-            yerr=iso_dayhour[f"s.heat.stderr"] * 1.96,
+            np.abs(iso_dayhour["s.heat"]),
+            yerr=iso_dayhour["s.heat.stderr"] * 1.96,
             fmt="x",
             capsize=3,
             label="Heating Slopes",
         )
         ax1.errorbar(
             iso_dayhour.index + 0.3,
-            np.abs(iso_dayhour[f"s.cool.db"]),
-            yerr=iso_dayhour[f"s.cool.db.stderr"] * 1.96,
+            np.abs(iso_dayhour["s.cool.db"]),
+            yerr=iso_dayhour["s.cool.db.stderr"] * 1.96,
             fmt="x",
             capsize=3,
             color="tab:orange",
@@ -362,10 +362,8 @@ def main_plots(iso_list):
         for use in ["Heating", "Cooling"]:
             zone_shp.index = zone_shp["BA"]
             zone_shp[use] = abs(zone_elec_btu_m2_c[use])
-            vmax = np.max(np.max(zone_elec_btu_m2_c.loc[zone_names[iso]])) + 1
-
             fig, ax = plt.subplots(1, 1)
-            heatmap = zone_shp.plot(
+            zone_shp.plot(
                 column=use,
                 ax=ax,
                 vmin=0,
