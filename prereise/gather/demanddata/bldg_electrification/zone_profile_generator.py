@@ -9,6 +9,7 @@ from pandas.tseries.holiday import USFederalHolidayCalendar as calendar  # noqa:
 from scipy.stats import t
 from prereise.gather.demanddata.bldg_electrification import const
 
+
 def bkpt_scale(df, num_points, bkpt, heat_cool):
     """Adjust heating or cooling breakpoint to ensure there are enough data points to fit.
 
