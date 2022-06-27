@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 from pandas.tseries.holiday import USFederalHolidayCalendar as calendar  # noqa: N813
+
 from prereise.gather.demanddata.bldg_electrification import const
 
 
