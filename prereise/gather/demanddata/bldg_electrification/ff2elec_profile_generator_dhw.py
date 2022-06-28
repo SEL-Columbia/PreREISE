@@ -42,7 +42,7 @@ def func_dhw_cop(temp_c, model):
 os.makedirs("Profiles", exist_ok=True)
 
 
-def generate_profiles(yr_temps=2016, bldg_class="res", hp_model="advperfhp"):
+def generate_profiles(yr_temps=const.base_year, bldg_class="res", hp_model="advperfhp"):
     """Create time series for electricity loads from converting fossil fuel
     water heating to heat pump water heaters
 
