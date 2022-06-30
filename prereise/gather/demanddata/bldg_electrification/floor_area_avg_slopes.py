@@ -12,8 +12,8 @@ def get_zone_floor_area(iso_list):
 
     :param list of str iso_list: list of abbrev. names of ISO.
 
-    :return: (*pandas.DataFrame*) zone_floor_area -- Floor area for all the zones with breakdowns of res, com and total heating and total cooling
-    :return: csv -- Saves the csv of the floor area into result_stats
+    :return: (*pandas.DataFrame*) zone_floor_area -- Floor area in square meters for all the zones with breakdowns of res, com and total heating and total cooling
+    :return: csv -- Saves the csv of the floor area in square meters into result_stats
     """
     zone_floor_area = pd.DataFrame()
     for iso in iso_list:
@@ -69,7 +69,7 @@ def get_zone_floor_area(iso_list):
                     ),
                 ]
             )
-    zone_floor_area.to_csv("./Profiles/result_stats/zone_floor_area.csv")
+    zone_floor_area.to_csv("./Profiles/result_stats/zone_floor_area_m2.csv")
     return zone_floor_area
 
 
