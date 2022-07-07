@@ -759,7 +759,7 @@ if __name__ == "__main__":
         "ISNE-4002",
         "ISNE-4003",
         "ISNE-4004",
-        "ISNE-4005"
+        "ISNE-4005",
     ]
 
     zone_name_shps = [
@@ -796,7 +796,7 @@ if __name__ == "__main__":
         "ISONE-New Hampshire",
         "ISONE-Vermont",
         "ISONE-Connecticut",
-        "ISONE-Rhode Island"
+        "ISONE-Rhode Island",
     ]
 
     for i in range(len(zone_names)):
