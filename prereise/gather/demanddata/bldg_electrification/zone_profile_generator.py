@@ -723,6 +723,15 @@ def main(zone_name, zone_name_shp, base_year, year, plot_boolean=False):
 
 
 if __name__ == "__main__":
+
+    # Reading Balancing Authority and Pumas shapefiles for overlaying
+    zone_shp = read_shapefile(
+        "https://besciences.blob.core.windows.net/shapefiles/USA/balancing-authorities/ba_area/ba_area.zip"
+    )
+    pumas_shp = read_shapefile(
+        "https://besciences.blob.core.windows.net/shapefiles/USA/pumas-overlay/pumas_overlay.zip"
+    )
+
     # Use base_year for model fitting
     base_year = const.base_year
 
@@ -733,7 +742,7 @@ if __name__ == "__main__":
     plot_boolean = False
 
     zone_names = [
-        "NYIS-ZONA",
+        "NYIS-ZONA",  # NYISO
         "NYIS-ZONB",
         "NYIS-ZONC",
         "NYIS-ZOND",
@@ -744,7 +753,7 @@ if __name__ == "__main__":
         "NYIS-ZONI",
         "NYIS-ZONJ",
         "NYIS-ZONK",
-        "ERCO-C",
+        "ERCO-C",  # ERCOT
         "ERCO-E",
         "ERCO-FW",
         "ERCO-N",
@@ -752,7 +761,7 @@ if __name__ == "__main__":
         "ERCO-S",
         "ERCO-SC",
         "ERCO-W",
-        "CISO-PGAE",
+        "CISO-PGAE",  # CAISO
         "CISO-SCE",
         "CISO-SDGE",
         "CISO-VEA",
@@ -761,16 +770,82 @@ if __name__ == "__main__":
         "LDWP",
         "TIDC",
         "BANC",
-        "ISNE-4000",
+        "ISNE-4000",  # ISO-NE
         "ISNE-4001",
         "ISNE-4002",
         "ISNE-4003",
         "ISNE-4004",
         "ISNE-4005",
+        "PJM-AE",  # PJM
+        "PJM-AEP",
+        "PJM-AP",
+        "PJM-ATSI",
+        "PJM-BC",
+        "PJM-CE",
+        "PJM-DAY",
+        "PJM-DEOK",
+        "PJM-DUQ",
+        "PJM-DPL",
+        "PJM-DOM",
+        "PJM-EKPC",
+        "PJM-JC",
+        "PJM-ME",
+        "PJM-PE",
+        "PJM-PN",
+        "PJM-PEP",
+        "PJM-PL",
+        "PJM-PS",
+        "PJM-RECO",
+        "SWPP-CSWS",  # SPP
+        "SWPP-EDE",
+        "SWPP-GRDA",
+        "SWPP-KACY",
+        "SWPP-KCPL",
+        "SWPP-LES",
+        "SWPP-MPS",
+        "SWPP-NPPD",
+        "SWPP-OKGE",
+        "SWPP-OPPD",
+        "SWPP-SECI",
+        "SWPP-SPRM",
+        "SWPP-SPS",
+        "SWPP-WAUE",
+        "SWPP-WFEC",
+        "SWPP-WR",
+        "MISO-0001",  # MISO
+        "MISO-0004",
+        "MISO-0006",
+        "MISO-0027",
+        "MISO-0035",
+        "MISO-8910",
+        "PNM",  # Southwest
+        "EPE",
+        "TEPC",
+        "AZPS",
+        "WACM",
+        "PACE",
+        "PSCO",
+        "PSEI",  # Northwest
+        "DOPD",
+        "AVA",
+        "CHPD",
+        "GCPD",
+        "BPAT",
+        "PGE",
+        "PACW",
+        "IPCO",
+        "NWMT",
+        "NEVP",
+        "AECI",  # Southeast
+        "SOCO",
+        "AEC",
+        "TVA",
+        "Carolina",
+        "Florida",
     ]
 
     zone_name_shps = [
-        "NYISO-A",
+        "NYISO-A",  # NYISO
         "NYISO-B",
         "NYISO-C",
         "NYISO-D",
@@ -781,7 +856,7 @@ if __name__ == "__main__":
         "NYISO-I",
         "NYISO-J",
         "NYISO-K",
-        "ERCO-C",
+        "ERCO-C",  # ERCOT
         "ERCO-E",
         "ERCO-FW",
         "ERCO-N",
@@ -789,7 +864,7 @@ if __name__ == "__main__":
         "ERCO-S",
         "ERCO-SC",
         "ERCO-W",
-        "CISO-PGAE",
+        "CISO-PGAE",  # CAISO
         "CISO-SCE",
         "CISO-SDGE",
         "CISO-VEA",
@@ -798,20 +873,79 @@ if __name__ == "__main__":
         "LADWP",
         "TID",
         "BANC",
-        "ISONE-Massachusetts",
+        "ISONE-Massachusetts",  # ISO-NE
         "ISONE-Maine",
         "ISONE-New Hampshire",
         "ISONE-Vermont",
         "ISONE-Connecticut",
         "ISONE-Rhode Island",
+        "PJM_AE",  # PJM
+        "PJM_AEP",
+        "PJM_AP",
+        "PJM_ATSI",
+        "PJM_BGE",
+        "PJM_ComEd",
+        "PJM_DAY",
+        "PJM_DEO&K",
+        "PJM_DLCO",
+        "PJM_DP&L",
+        "PJM_Dominion",
+        "PJM_EKPC",
+        "PJM_JCP&L",
+        "PJM_METED",
+        "PJM_PECO",
+        "PJM_PENELEC",
+        "PJM_PEPCO",
+        "PJM_PPL",
+        "PJM_PSEG",
+        "PJM_RECO",
+        "SPP-CSWS",  # SPP
+        "SPP-EDE",
+        "SPP-GRDA",
+        "SPP-KACY",
+        "SPP-KCPL",
+        "SPP-LES",
+        "SPP-MPS",
+        "SPP-NPPD",
+        "SPP-OKGE",
+        "SPP-OPPD",
+        "SPP-SECI",
+        "SPP-SPRM",
+        "SPP-SPS",
+        "SPP-WAUE",
+        "SPP-WFEC",
+        "SPP-WR",
+        "MISO-0001",  # MISO
+        "MISO-0004",
+        "MISO-0006",
+        "MISO-0027",
+        "MISO-0035",
+        "MISO-8910",
+        "PNM",  # Southwest
+        "EPE",
+        "TEPC",
+        "Arizona",
+        "WACM",
+        "PACE",
+        "PSCO",
+        "PSEI",  # Northwest
+        "DOPD",
+        "AVA",
+        "CHPD",
+        "GCPD",
+        "BPAT",
+        "PGE",
+        "PACW",
+        "IPCO",
+        "MT_west",
+        "NEVP",
+        "AECI",  # Southeast
+        "SOCO",
+        "AEC",
+        "TVA",
+        "Carolina",
+        "Florida",
     ]
-
-    zone_shp = read_shapefile(
-        "https://besciences.blob.core.windows.net/shapefiles/USA/balancing-authorities/ba_area/ba_area.zip"
-    )
-    pumas_shp = read_shapefile(
-        "https://besciences.blob.core.windows.net/shapefiles/USA/pumas-overlay/pumas_overlay.zip"
-    )
 
     for i in range(len(zone_names)):
         zone_name, zone_name_shp = zone_names[i], zone_name_shps[i]
