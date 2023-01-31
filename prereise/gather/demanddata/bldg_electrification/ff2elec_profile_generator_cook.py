@@ -6,7 +6,9 @@ import pandas as pd
 from prereise.gather.demanddata.bldg_electrification import const
 
 
-def generate_profiles(yr_temps=2016, states=const.state_list, bldg_class="res", efficiency="high"):
+def generate_cook_profiles(
+    yr_temps=2016, states=const.state_list, bldg_class="res", efficiency="high"
+):
     """This script returns hourly electricity loads from converting
     fossil fuel cooking to electric cooking
 

@@ -66,7 +66,13 @@ def htg_to_cop(temp_c, model):
         return calculate_cop(temp_c, model)
 
 
-def generate_htg_profiles(yr_temps, states=const.state_list, bldg_class="res", hp_model="advperfhp", output_folder="Profiles"):
+def generate_htg_profiles(
+    yr_temps,
+    states=const.state_list,
+    bldg_class="res",
+    hp_model="advperfhp",
+    output_folder="Profiles",
+):
     """Generate and write profiles on dist.
     Create time series for electricity loads from converting
     fossil fuel heating to electric heat pumps.
