@@ -14,4 +14,4 @@ def test_generate_profiles_argument_type():
     )
     for a in args:
         with pytest.raises(TypeError):
-            generate_htg_profiles(a[0], a[1], a[2])
+            generate_htg_profiles(a[0], a[1], a[2], a[3])
