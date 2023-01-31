@@ -78,7 +78,11 @@ def zonal_data(puma_data, hours_utc):
                 * puma_data["frac_in_zone"]
             )
             / sum(puma_data[f"res_area_{base_year}_m2"] * puma_data["frac_in_zone"]),
-            sum(puma_data[f"res_area_{base_year}_m2"] * puma_data["AC_penetration"] * puma_data["frac_in_zone"])
+            sum(
+                puma_data[f"res_area_{base_year}_m2"] 
+                * puma_data["AC_penetration"] 
+                * puma_data["frac_in_zone"]
+                )
             / sum(puma_data[f"res_area_{base_year}_m2"] * puma_data["frac_in_zone"]),
             sum(
                 puma_data[f"com_area_{base_year}_m2"]
