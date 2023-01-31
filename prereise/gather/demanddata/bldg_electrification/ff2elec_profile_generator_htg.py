@@ -66,7 +66,7 @@ def htg_to_cop(temp_c, model):
         return calculate_cop(temp_c, model)
 
 
-def generate_profiles(yr_temps, bldg_class, hp_model, output_folder="Profiles"):
+def generate_htg_profiles(yr_temps, states=const.state_list, bldg_class="res", hp_model="advperfhp", output_folder="Profiles"):
     """Generate and write profiles on dist.
     Create time series for electricity loads from converting
     fossil fuel heating to electric heat pumps.
@@ -116,12 +116,12 @@ def generate_profiles(yr_temps, bldg_class, hp_model, output_folder="Profiles"):
     )
 
     # Loop through states to create profile outputs
-    for state in const.state_list:
+    for state in states:
         # Load and subset relevant data for the state
         puma_data_it = const.puma_data.query("state == @state")
         puma_slopes_it = puma_slopes.query("state == @state")
         temps_pumas_it = pd.read_csv(
-            f"https://besciences.blob.core.windows.net/datasets/bldg_el/pumas/temps/temps_pumas_{state}_{yr_temps}.csv"
+            f"https://besciences.blob.core.windows.net/datasets/bldg_el/pumas/{yr_temps}/temps/temps_pumas_{state}_{yr_temps}.csv"
         )
 
         # Compute electric HP loads from fossil fuel conversion

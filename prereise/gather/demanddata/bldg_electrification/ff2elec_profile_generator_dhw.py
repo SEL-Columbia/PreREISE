@@ -42,7 +42,7 @@ def func_dhw_cop(temp_c, model):
 os.makedirs("Profiles", exist_ok=True)
 
 
-def generate_profiles(yr_temps=const.base_year, bldg_class="res", hp_model="advperfhp"):
+def generate_profiles(yr_temps=const.base_year, states=const.state_list, bldg_class="res", hp_model="advperfhp"):
     """Create time series for electricity loads from converting fossil fuel
     water heating to heat pump water heaters
 
@@ -92,13 +92,13 @@ def generate_profiles(yr_temps=const.base_year, bldg_class="res", hp_model="advp
     )
 
     # Loop through states to create profile outputs
-    for state in const.state_list:
+    for state in states:
 
         # Load and subset relevant data for the state
         puma_data_it = const.puma_data.query("state == @state")
 
         temps_pumas_it = pd.read_csv(
-            f"https://besciences.blob.core.windows.net/datasets/bldg_el/pumas/temps/temps_pumas_{state}_{yr_temps}.csv"
+            f"https://besciences.blob.core.windows.net/datasets/bldg_el/pumas/{yr_temps}/temps/temps_pumas_{state}_{yr_temps}.csv"
         )
 
         hours = pd.date_range(
