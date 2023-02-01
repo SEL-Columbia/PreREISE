@@ -68,42 +68,52 @@ def zonal_data(puma_data, hours_utc):
 
     stats = pd.Series(
         data=[
-            sum(puma_data["pop"]),
-            sum(puma_data[f"res_area_{base_year}_m2"]),
-            sum(puma_data[f"com_area_{base_year}_m2"]),
-            sum(puma_data["ind_area_gbs_m2"]),
+            sum(puma_data["pop"] * puma_data["frac_in_zone"]),
+            sum(puma_data[f"res_area_{base_year}_m2"] * puma_data["frac_in_zone"]),
+            sum(puma_data[f"com_area_{base_year}_m2"] * puma_data["frac_in_zone"]),
+            sum(puma_data["ind_area_gbs_m2"] * puma_data["frac_in_zone"]),
             sum(
                 puma_data[f"res_area_{base_year}_m2"]
                 * puma_data[f"frac_elec_sh_res_{base_year}"]
+                * puma_data["frac_in_zone"]
             )
-            / sum(puma_data[f"res_area_{base_year}_m2"]),
-            sum(puma_data[f"res_area_{base_year}_m2"] * puma_data["AC_penetration"])
-            / sum(puma_data[f"res_area_{base_year}_m2"]),
+            / sum(puma_data[f"res_area_{base_year}_m2"] * puma_data["frac_in_zone"]),
+            sum(
+                puma_data[f"res_area_{base_year}_m2"]
+                * puma_data["AC_penetration"]
+                * puma_data["frac_in_zone"]
+            )
+            / sum(puma_data[f"res_area_{base_year}_m2"] * puma_data["frac_in_zone"]),
             sum(
                 puma_data[f"com_area_{base_year}_m2"]
                 * puma_data[f"frac_elec_sh_com_{base_year}"]
+                * puma_data["frac_in_zone"]
             )
-            / sum(puma_data[f"com_area_{base_year}_m2"]),
+            / sum(puma_data[f"com_area_{base_year}_m2"] * puma_data["frac_in_zone"]),
             sum(
                 puma_data[f"res_area_{base_year}_m2"]
                 * puma_data[f"frac_elec_dhw_res_{base_year}"]
+                * puma_data["frac_in_zone"]
             )
-            / sum(puma_data[f"res_area_{base_year}_m2"]),
+            / sum(puma_data[f"res_area_{base_year}_m2"] * puma_data["frac_in_zone"]),
             sum(
                 puma_data[f"com_area_{base_year}_m2"]
                 * puma_data[f"frac_elec_dhw_com_{base_year}"]
+                * puma_data["frac_in_zone"]
             )
-            / sum(puma_data[f"com_area_{base_year}_m2"]),
+            / sum(puma_data[f"com_area_{base_year}_m2"] * puma_data["frac_in_zone"]),
             sum(
                 puma_data[f"res_area_{base_year}_m2"]
                 * puma_data[f"frac_elec_other_res_{base_year}"]
+                * puma_data["frac_in_zone"]
             )
-            / sum(puma_data[f"res_area_{base_year}_m2"]),
+            / sum(puma_data[f"res_area_{base_year}_m2"] * puma_data["frac_in_zone"]),
             sum(
                 puma_data[f"com_area_{base_year}_m2"]
                 * puma_data[f"frac_elec_cook_com_{base_year}"]
+                * puma_data["frac_in_zone"]
             )
-            / sum(puma_data[f"com_area_{base_year}_m2"]),
+            / sum(puma_data[f"com_area_{base_year}_m2"] * puma_data["frac_in_zone"]),
             sum(puma_data["hdd65_normals"] * puma_data["pop"] / sum(puma_data["pop"])),
             sum(puma_data["cdd65_normals"] * puma_data["pop"] / sum(puma_data["pop"])),
         ],
@@ -534,7 +544,16 @@ def temp_to_energy(temp_series, hourly_fits_df, db_wb_fit):
         else "wknd"
     )
 
-    (t_bpc, t_bph, i_heat, s_heat, s_dark, i_cool, s_cool_db, s_cool_wb,) = (
+    (
+        t_bpc,
+        t_bph,
+        i_heat,
+        s_heat,
+        s_dark,
+        i_cool,
+        s_cool_db,
+        s_cool_wb,
+    ) = (
         hourly_fits_df.at[zone_hour, f"t.bpc.{wk_wknd}.c"],
         hourly_fits_df.at[zone_hour, f"t.bph.{wk_wknd}.c"],
         hourly_fits_df.at[zone_hour, f"i.heat.{wk_wknd}"],
@@ -562,7 +581,6 @@ def temp_to_energy(temp_series, hourly_fits_df, db_wb_fit):
         )
 
     if temp > t_bpc and temp < t_bph:
-
         mid_cool_eng = ((temp - t_bpc) / (t_bph - t_bpc)) ** 2 * (
             s_cool_db * t_bph
             + s_cool_wb
@@ -727,7 +745,6 @@ def main(zone_name, zone_name_shp, base_year, year, plot_boolean=False):
 
 
 if __name__ == "__main__":
-
     # Reading Balancing Authority and Pumas shapefiles for overlaying
     zone_shp = read_shapefile(
         "https://besciences.blob.core.windows.net/shapefiles/USA/balancing-authorities/ba_area/ba_area.zip"
