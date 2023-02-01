@@ -3,7 +3,6 @@ from itertools import product
 
 import numpy as np
 import pandas as pd
-from pandas.tseries.holiday import USFederalHolidayCalendar as calendar  # noqa: N813
 
 from prereise.gather.demanddata.bldg_electrification import const
 from prereise.gather.demanddata.bldg_electrification.ff2elec_profile_generator_cook import (
@@ -24,7 +23,7 @@ from prereise.gather.demanddata.bldg_electrification.zone_profile_generator impo
 )
 
 
-class scenarios:
+class Scenarios:
     # read and process a scenario (reflects either model base year or a projection year) from user defined parameters
     def __init__(self, id, input_series, other=None):
         """define scenarios.
@@ -43,7 +42,7 @@ class scenarios:
         input_series = input_series.astype("float64")
         self.cool_energy_intensity = input_series["cool_energy_intensity(relative)"]
         self.stats = input_series
-        if other == None:
+        if other is None:
             self.stats = (
                 input_series.dropna()
             )  # dropna is supposed to drop rows that only used for defining future scenarios
@@ -301,7 +300,7 @@ def scale_energy(
     :param pandas.DataFrame base_energy: dataframe of disaggregated electricity consumptions for all weather years
     :param pandas.DataFrame temp_df: weather records the given hours
 
-    :return (*pandas.DataFrame*) scen_load_MWh -- hourly electricity consumption induced by heat pump heating, resistance heating, cooling, and 'base' loads for a projection scenario
+    :return (*pandas.DataFrame*) scen_load_mwh -- hourly electricity consumption induced by heat pump heating, resistance heating, cooling, and 'base' loads for a projection scenario
     """
     base_load_scaler = new_scen.floor_area_growth(base_scen)
     cool_load_scaler = new_scen.frac_cooling_eff_change(
@@ -329,22 +328,22 @@ def scale_energy(
             ]
         hp_load_scaler = hp_cop_scaler * new_scen.frac_hp_growth(base_scen)
 
-    scen_load_MWh = pd.DataFrame(index=base_energy.index)
-    scen_load_MWh["base_load_mw"] = base_energy["base_load_mw"] * base_load_scaler
+    scen_load_mwh = pd.DataFrame(index=base_energy.index)
+    scen_load_mwh["base_load_mw"] = base_energy["base_load_mw"] * base_load_scaler
     if (
         new_hp_profile == "elec"
     ):  # if user select to use the current electricity heat pump consumption profiles for heating load projection
-        scen_load_MWh["heat_hp_load_mw"] = (
+        scen_load_mwh["heat_hp_load_mw"] = (
             base_energy["heat_hp_load_mw"] * hp_load_scaler
         )
     else:
-        scen_load_MWh["heat_existing_hp_load_mw"] = base_energy["heat_hp_load_mw"]
-    scen_load_MWh["heat_resist_load_mw"] = (
+        scen_load_mwh["heat_existing_hp_load_mw"] = base_energy["heat_hp_load_mw"]
+    scen_load_mwh["heat_resist_load_mw"] = (
         base_energy["heat_resist_load_mw"] * resist_load_scaler
     )
-    scen_load_MWh["cool_load_mw"] = base_energy["cool_load_mw"] * cool_load_scaler
+    scen_load_mwh["cool_load_mw"] = base_energy["cool_load_mw"] * cool_load_scaler
 
-    return scen_load_MWh
+    return scen_load_mwh
 
 
 def ff_electrify_profiles(weather_years, puma_data, new_scen, base_scen):
@@ -354,7 +353,7 @@ def ff_electrify_profiles(weather_years, puma_data, new_scen, base_scen):
     :param class scenarios new_scen: projection scenario class
     :param class scenarios base_scen: reference scenario class
 
-    :return (*pandas.DataFrame*) ff2hp_load_MWh -- hourly projection load from converting fossil fuel consumption to electricity for projection scenarios given weather conditions from selected weather years
+    :return (*pandas.DataFrame*) ff2hp_load_mwh -- hourly projection load from converting fossil fuel consumption to electricity for projection scenarios given weather conditions from selected weather years
     """
 
     def ff2hp_dhw_profiles(clas):
@@ -474,35 +473,35 @@ def ff_electrify_profiles(weather_years, puma_data, new_scen, base_scen):
     hp_type_dhw = new_scen.hp_type_dhw
     hp_type_heat = new_scen.hp_type_heat
     cook_eff = new_scen.cook_efficiency
-    ff2hp_load_MWh = pd.DataFrame(index=hours_utc_weather_years)
+    ff2hp_load_mwh = pd.DataFrame(index=hours_utc_weather_years)
     for clas in const.classes:
         frac_dhw_ff2hp = new_scen.frac_dhw_ff2hp(base_scen, clas)
         if frac_dhw_ff2hp != 0:
-            ff2hp_load_MWh[f"dhw_{clas}"] = ff2hp_dhw_profiles(clas).to_list()
-            ff2hp_load_MWh[f"dhw_{clas}"] = (
-                ff2hp_load_MWh[f"dhw_{clas}"]
+            ff2hp_load_mwh[f"dhw_{clas}"] = ff2hp_dhw_profiles(clas).to_list()
+            ff2hp_load_mwh[f"dhw_{clas}"] = (
+                ff2hp_load_mwh[f"dhw_{clas}"]
                 * new_scen.floor_area_growth_type(base_scen, clas)
                 * frac_dhw_ff2hp
             )  # scale energy consumption by floor area information
 
         frac_htg_ff2hp = new_scen.frac_htg_ff2hp(base_scen, clas)
         if new_hp_profile == "ff" and frac_htg_ff2hp != 0:
-            ff2hp_load_MWh[f"htg_{clas}"] = ff2hp_htg_profiles(clas).to_list()
-            ff2hp_load_MWh[f"htg_{clas}"] = (
-                ff2hp_load_MWh[f"htg_{clas}"]
+            ff2hp_load_mwh[f"htg_{clas}"] = ff2hp_htg_profiles(clas).to_list()
+            ff2hp_load_mwh[f"htg_{clas}"] = (
+                ff2hp_load_mwh[f"htg_{clas}"]
                 * new_scen.floor_area_growth_type(base_scen, clas)
                 * frac_htg_ff2hp
             )
 
         frac_cook_ff2hp = new_scen.frac_cook_ff2hp(base_scen, clas)
         if frac_cook_ff2hp != 0:
-            ff2hp_load_MWh[f"cook_{clas}"] = ff2hp_cook_profiles(clas)
-            ff2hp_load_MWh[f"cook_{clas}"] = (
-                ff2hp_load_MWh[f"cook_{clas}"]
+            ff2hp_load_mwh[f"cook_{clas}"] = ff2hp_cook_profiles(clas)
+            ff2hp_load_mwh[f"cook_{clas}"] = (
+                ff2hp_load_mwh[f"cook_{clas}"]
                 * new_scen.floor_area_growth_type(base_scen, clas)
                 * new_scen.frac_cook_ff2hp(base_scen, clas)
             )
-    return ff2hp_load_MWh
+    return ff2hp_load_mwh
 
 
 def predict_scenario(zone_name, zone_name_shp, base_scen, new_scens, weather_years):
@@ -543,8 +542,8 @@ def predict_scenario(zone_name, zone_name_shp, base_scen, new_scens, weather_yea
         index_col=0,
     )
 
-    midperfhp_cop = pd.read_csv(f"./data/cop_temp_htg_midperfhp.csv")
-    advperfhp_cop = pd.read_csv(f"./data/cop_temp_htg_advperfhp.csv")
+    midperfhp_cop = pd.read_csv("./data/cop_temp_htg_midperfhp.csv")
+    advperfhp_cop = pd.read_csv("./data/cop_temp_htg_advperfhp.csv")
     midperfhp_cop.index = midperfhp_cop["temp"]
     advperfhp_cop.index = advperfhp_cop["temp"]
 
@@ -580,12 +579,12 @@ def predict_scenario(zone_name, zone_name_shp, base_scen, new_scens, weather_yea
     zone_profile_refload_MWh.set_index("hour_utc", inplace=True)
 
     # scale energy to each projection scenarios
-    elec_profile_load_MWh = {}
-    zone_profile_load_MWh = {}
-    zone_profile_load_MWh["base"] = zone_profile_refload_MWh
-    ff2hp_profile_load_MWh = {}
+    elec_profile_load_mwh = {}
+    zone_profile_load_mwh = {}
+    zone_profile_load_mwh["base"] = zone_profile_refload_MWh
+    ff2hp_profile_load_mwh = {}
     for id, scenario in new_scens.items():
-        elec_profile_load_MWh[id] = scale_energy(
+        elec_profile_load_mwh[id] = scale_energy(
             zone_profile_refload_MWh,
             temp_df,
             base_scen,
@@ -593,14 +592,14 @@ def predict_scenario(zone_name, zone_name_shp, base_scen, new_scens, weather_yea
             midperfhp_cop,
             advperfhp_cop,
         )
-        ff2hp_profile_load_MWh[id] = ff_electrify_profiles(
+        ff2hp_profile_load_mwh[id] = ff_electrify_profiles(
             weather_years, puma_data_zone, scenario, base_scen
         )
-        zone_profile_load_MWh[id] = pd.concat(
-            [elec_profile_load_MWh[id], ff2hp_profile_load_MWh[id]], axis=1
+        zone_profile_load_mwh[id] = pd.concat(
+            [elec_profile_load_mwh[id], ff2hp_profile_load_mwh[id]], axis=1
         )
 
-    return zone_profile_load_MWh
+    return zone_profile_load_mwh
 
 
 if __name__ == "__main__":
@@ -643,19 +642,19 @@ if __name__ == "__main__":
             index_col=0,
         )
 
-        base_scenarios = scenarios("base", scen_data.pop("yr2019"))
+        base_scenarios = Scenarios("base", scen_data.pop("yr2019"))
         print(f"base scenario: year {base_year}, weather year: {weather_years}")
 
         proj_scenarios = {}
         for name, values in scen_data.iteritems():
-            proj_scenarios[name] = scenarios(name, values, base_scenarios)
+            proj_scenarios[name] = Scenarios(name, values, base_scenarios)
             print(f"projection scenario {name}, year {proj_scenarios[name].year}")
 
         os.makedirs(
             os.path.join(os.path.dirname(__file__), "Profiles"),
             exist_ok=True,
         )
-        zone_profile_load_MWh = predict_scenario(
+        zone_profile_load_mwh = predict_scenario(
             zone_name, zone_name_shp, base_scenarios, proj_scenarios, weather_years
         )
 
@@ -664,8 +663,8 @@ if __name__ == "__main__":
             exist_ok=True,
         )
 
-        for name, values in zone_profile_load_MWh.items():
-            zone_profile_load_MWh[name].to_csv(
+        for name, values in zone_profile_load_mwh.items():
+            zone_profile_load_mwh[name].to_csv(
                 os.path.join(
                     os.path.dirname(__file__),
                     "projection",
