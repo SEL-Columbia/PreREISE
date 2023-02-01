@@ -5,15 +5,15 @@ import numpy as np
 import pandas as pd
 from pandas.tseries.holiday import USFederalHolidayCalendar as calendar  # noqa: N813
 
-from ff2elec_profile_generator_htg import generate_htg_profiles
-from ff2elec_profile_generator_dhw import generate_dhw_profiles
-from ff2elec_profile_generator_cook import generate_cook_profiles
-from zone_profile_generator import zonal_data
-from helper import (
+from prereise.gather.demanddata.bldg_electrification.ff2elec_profile_generator_htg import generate_htg_profiles
+from prereise.gather.demanddata.bldg_electrification.ff2elec_profile_generator_dhw import generate_dhw_profiles
+from prereise.gather.demanddata.bldg_electrification.ff2elec_profile_generator_cook import generate_cook_profiles
+from prereise.gather.demanddata.bldg_electrification.zone_profile_generator import zonal_data
+from prereise.gather.demanddata.bldg_electrification.helper import (
     read_shapefile,
     zone_shp_overlay,
 )
-import const
+from prereise.gather.demanddata.bldg_electrification import const
 
 
 class scenarios:
@@ -222,7 +222,16 @@ def temp_to_energy(temp_series, hourly_fits_df, db_wb_fit, base_scen, hp_heat_co
         else "wknd"
     )
 
-    (t_bpc, t_bph, i_heat, s_heat, s_dark, i_cool, s_cool_db, s_cool_wb,) = (
+    (
+        t_bpc,
+        t_bph,
+        i_heat,
+        s_heat,
+        s_dark,
+        i_cool,
+        s_cool_db,
+        s_cool_wb,
+    ) = (
         hourly_fits_df.at[zone_hour, f"t.bpc.{wk_wknd}.c"],
         hourly_fits_df.at[zone_hour, f"t.bph.{wk_wknd}.c"],
         hourly_fits_df.at[zone_hour, f"i.heat.{wk_wknd}"],
@@ -257,19 +266,18 @@ def temp_to_energy(temp_series, hourly_fits_df, db_wb_fit, base_scen, hp_heat_co
             + s_cool_wb
             * (
                 temp_wb
-                - (db_wb_fit[0] * temp ** 2 + db_wb_fit[1] * temp + db_wb_fit[2])
+                - (db_wb_fit[0] * temp**2 + db_wb_fit[1] * temp + db_wb_fit[2])
             )
             + i_cool
         )
 
     if temp > t_bpc and temp < t_bph:
-
         mid_cool_eng = ((temp - t_bpc) / (t_bph - t_bpc)) ** 2 * (
             s_cool_db * t_bph
             + s_cool_wb
             * (
                 temp_wb
-                - (db_wb_fit[0] * temp ** 2 + db_wb_fit[1] * temp + db_wb_fit[2])
+                - (db_wb_fit[0] * temp**2 + db_wb_fit[1] * temp + db_wb_fit[2])
             )
             + i_cool
         )
@@ -343,7 +351,7 @@ def ff_electrify_profiles(weather_years, puma_data, new_scen, base_scen):
 
     def ff2hp_dhw_profiles(clas):
         ff2hp_dhw_pumas_yrs = pd.DataFrame()
-        for (weather_year, state) in product(weather_years, zone_states):
+        for weather_year, state in product(weather_years, zone_states):
             if not os.path.isfile(
                 os.path.join(
                     os.path.dirname(__file__),
@@ -381,7 +389,7 @@ def ff_electrify_profiles(weather_years, puma_data, new_scen, base_scen):
 
     def ff2hp_htg_profiles(clas):
         ff2hp_htg_pumas_yrs = pd.DataFrame()
-        for (weather_year, state) in product(weather_years, zone_states):
+        for weather_year, state in product(weather_years, zone_states):
             if not os.path.isfile(
                 os.path.join(
                     os.path.dirname(__file__),
@@ -633,7 +641,7 @@ if __name__ == "__main__":
         proj_scenarios = {}
         for name, values in scen_data.iteritems():
             proj_scenarios[name] = scenarios(name, values, base_scenarios)
-            print(f"projection scenario {name}, year {proj_scenarios.year}")
+            print(f"projection scenario {name}, year {proj_scenarios[name].year}")
 
         os.makedirs(
             os.path.join(os.path.dirname(__file__), "Profiles"),

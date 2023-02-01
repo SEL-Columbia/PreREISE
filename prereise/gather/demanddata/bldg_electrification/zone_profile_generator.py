@@ -668,7 +668,9 @@ def main(zone_name, zone_name_shp, base_year, year, plot_boolean=False):
 
     puma_data_zone = zone_shp_overlay(zone_name_shp, zone_shp, pumas_shp)
 
-    temp_df_base_year, stats_base_year = zonal_data(puma_data_zone, hours_utc_base_year, year)
+    temp_df_base_year, stats_base_year = zonal_data(
+        puma_data_zone, hours_utc_base_year, year
+    )
 
     temp_df_base_year["load_mw"] = zone_load
 
@@ -737,7 +739,6 @@ def main(zone_name, zone_name_shp, base_year, year, plot_boolean=False):
 
 
 if __name__ == "__main__":
-
     # Reading Balancing Authority and Pumas shapefiles for overlaying
     zone_shp = read_shapefile(
         "https://besciences.blob.core.windows.net/shapefiles/USA/balancing-authorities/ba_area/ba_area.zip"
