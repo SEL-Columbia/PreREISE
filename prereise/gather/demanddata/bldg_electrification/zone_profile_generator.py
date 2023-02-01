@@ -544,7 +544,16 @@ def temp_to_energy(temp_series, hourly_fits_df, db_wb_fit):
         else "wknd"
     )
 
-    (t_bpc, t_bph, i_heat, s_heat, s_dark, i_cool, s_cool_db, s_cool_wb,) = (
+    (
+        t_bpc,
+        t_bph,
+        i_heat,
+        s_heat,
+        s_dark,
+        i_cool,
+        s_cool_db,
+        s_cool_wb,
+    ) = (
         hourly_fits_df.at[zone_hour, f"t.bpc.{wk_wknd}.c"],
         hourly_fits_df.at[zone_hour, f"t.bph.{wk_wknd}.c"],
         hourly_fits_df.at[zone_hour, f"i.heat.{wk_wknd}"],
@@ -572,7 +581,6 @@ def temp_to_energy(temp_series, hourly_fits_df, db_wb_fit):
         )
 
     if temp > t_bpc and temp < t_bph:
-
         mid_cool_eng = ((temp - t_bpc) / (t_bph - t_bpc)) ** 2 * (
             s_cool_db * t_bph
             + s_cool_wb

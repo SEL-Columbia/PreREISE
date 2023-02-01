@@ -57,7 +57,6 @@ def generate_cook_profiles(
 
     # Loop through states to create profile outputs
     for state in states:
-
         # Load and subset relevant data for the state
         puma_data_it = const.puma_data[const.puma_data["state"] == state]
 
