@@ -161,7 +161,7 @@ def scale_energy(
         elif new_scen.hp_type_heat == "advperfhp":
             new_hp_heat_cop = advperfhp_cop
 
-        hp_cop_adv = new_hp_heat_cop / base_hp_heat_cop  # <1
+        hp_cop_adv = base_hp_heat_cop / new_hp_heat_cop  # <1
 
         hp_cop_scaler = pd.Series(dtype="float64")
         for i in temp_df.index:
@@ -395,8 +395,20 @@ def predict_scenario(zone_name, zone_name_shp, base_scen, new_scens, weather_yea
         index_col=0,
     )
 
-    midperfhp_cop = pd.read_csv("./data/cop_temp_htg_midperfhp.csv")
-    advperfhp_cop = pd.read_csv("./data/cop_temp_htg_advperfhp.csv")
+    midperfhp_cop = pd.read_csv(
+        os.path.join(
+            os.path.dirname(__file__),
+            "data",
+            "cop_temp_htg_midperfhp.csv",
+        )
+    )
+    advperfhp_cop = pd.read_csv(
+        os.path.join(
+            os.path.dirname(__file__),
+            "data",
+            "cop_temp_htg_advperfhp.csv",
+        )
+    )
     midperfhp_cop.index = midperfhp_cop["temp"]
     advperfhp_cop.index = advperfhp_cop["temp"]
 
@@ -446,7 +458,7 @@ def predict_scenario(zone_name, zone_name_shp, base_scen, new_scens, weather_yea
             advperfhp_cop,
         )
         ff2hp_profile_load_mwh[id] = ff_electrify_profiles(
-            weather_years, puma_data_zone, scenario, base_scen
+            weather_years, puma_data_zone, base_scen, scenario
         )
         zone_profile_load_mwh[id] = pd.concat(
             [elec_profile_load_mwh[id], ff2hp_profile_load_mwh[id]], axis=1
